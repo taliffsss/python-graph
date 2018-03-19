@@ -14,16 +14,22 @@ main = "https://www.msw.ph/"
 mswmega = "https://megasportsworld.com"
 mswlive = "https://mswlive.com/"
 mswsites = "https://www.mswsites.com/"
+facebook = "https://www.facebook.com/"
+google = "https://www.google.com/"
 
 msw = requests.post(main)
 mega = requests.post(mswmega)
 live = requests.post(mswlive)
 sites = requests.post(mswsites)
+fb = requests.post(facebook)
+g = requests.post(google)
 
 mswmain = msw.elapsed.total_seconds()
 mswmega = mega.elapsed.total_seconds()
 mswlive = live.elapsed.total_seconds()
 mswsites = sites.elapsed.total_seconds()
+face = fb.elapsed.total_seconds()
+gm = g.elapsed.total_seconds()
 
 max_length = 50
 times = deque(maxlen=max_length)
@@ -31,14 +37,18 @@ mswlivesites = deque(maxlen=max_length)
 mainsites = deque(maxlen=max_length)
 mswmedia = deque(maxlen=max_length)
 portalsites = deque(maxlen=max_length)
+fbsites = deque(maxlen=max_length)
+googlecom = deque(maxlen=max_length)
 
 data_dict = {"Main Sites":mainsites,
 "Mega Sports World":mswmedia,
 "MSW Sites":portalsites,
-"MSW LIVE":mswlivesites}
+"MSW LIVE":mswlivesites,
+"Facebook":fbsites,
+"Google":googlecom}
 
 
-def update_obd_values(times, mswlivesites, mainsites, mswmedia, portalsites):
+def update_obd_values(times, mswlivesites, mainsites, mswmedia, portalsites,fbsites,googlecom):
 
     times.append(time.time())
     if len(times) == 1:
@@ -47,13 +57,15 @@ def update_obd_values(times, mswlivesites, mainsites, mswmedia, portalsites):
         mainsites.append(random.uniform(mswmain,mswmain))
         mswmedia.append(random.uniform(mswmega,mswmega))
         portalsites.append(random.uniform(mswsites,mswsites))
+        fbsites.append(random.uniform(face,face))
+        googlecom.append(random.uniform(gm,gm))
     else:
-        for data_of_interest in [mswlivesites, mainsites, mswmedia, portalsites]:
+        for data_of_interest in [mswlivesites, mainsites, mswmedia, portalsites,fbsites,googlecom]:
             data_of_interest.append(data_of_interest[-1]+data_of_interest[-1]*random.uniform(-0.0001,0.0001))
 
     return times, mswlivesites, mainsites, mswmedia, portalsites
 
-times, mswlivesites, mainsites, mswmedia, portalsites = update_obd_values(times, mswlivesites, mainsites, mswmedia, portalsites)
+times, mswlivesites, mainsites, mswmedia, portalsites = update_obd_values(times, mswlivesites, mainsites, mswmedia, portalsites,fbsites,googlecom)
 
 app.layout = html.Div([
     html.Div([
@@ -64,7 +76,7 @@ app.layout = html.Div([
     dcc.Dropdown(id='vehicle-data-name',
                  options=[{'label': s, 'value': s}
                           for s in data_dict.keys()],
-                 value=['Main Sites','Mega Sports World','MSW Sites','MSW LIVE'],
+                 value=['Facebook','Google'],
                  multi=True
                  ),
     html.Div(children=html.Div(id='graphs'), className='row'),
@@ -81,7 +93,7 @@ app.layout = html.Div([
     )
 def update_graph(data_names):
     graphs = []
-    update_obd_values(times, mswlivesites, mainsites, mswmedia, portalsites)
+    update_obd_values(times, mswlivesites, mainsites, mswmedia, portalsites,fbsites,googlecom)
     if len(data_names)>2:
         class_choice = 'col s12 m6 l4'
     elif len(data_names) == 2:
@@ -121,6 +133,7 @@ external_js = ['https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/ma
 for js in external_css:
     app.scripts.append_script({'external_url': js})
 
+server = app.server
 
 if __name__ == '__main__':
     app.run_server(debug=True)
